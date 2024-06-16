@@ -47,5 +47,20 @@ public class AppController {
         return "users";
     }
 
+    @GetMapping("/conversation")
+    public String showConversation(Model model) {
+        model.addAttribute("prevMessage", new Message());
+        model.addAttribute("message", new Message());
+        return "conversation";
+    }
+
+    @PostMapping("/conversation")
+    public String listConversation(Message prevMessage, Model model) {
+        model.addAttribute("prevMessage", prevMessage);
+        model.addAttribute("message", new Message());
+        return "conversation";
+    }
+
+
 }
 

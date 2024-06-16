@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>List Of Conversations</title>
+</head>
+<body>
+<div class="container text-center">
+    <div>
+        <h1>Start a Conversation</h1>
+    </div>
+    <div th:text="${prevMessage.text}"></div>
+
+    <form th:action="@{/conversation}" th:object="${message}"
+          method="post" style="max-width: 600px; margin: 0 auto;">
+        <div class="m-3">
+
+
+            <div class="form-group row">
+
+                <div class="col-8">
+                    <input type="text" th:field="*{text}" />
+                </div>
+            </div>
+
+
+            <div>
+                <button TYPE="submit" class="btn btn-primary">Submit</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+</body>
+</html>

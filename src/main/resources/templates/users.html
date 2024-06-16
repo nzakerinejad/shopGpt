@@ -11,7 +11,8 @@
     <div>
         <form th:action="@{/logout}" method="post">
             <p>
-                Welcome <b><span sec:authentication="principal.fullName"></span></b>
+<!--                Welcome <b><span sec:authentication="principal.fullName"></span></b>-->
+                wel nabeckam <span sec:authorize="isAuthenticated()" sec:authentication="principal.authorities">
             </p>
             <input type="submit" value="Sign Out" />
         </form>
