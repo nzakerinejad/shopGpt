@@ -15,6 +15,9 @@ public class AppController {
     @Autowired
     private UserRepository userRepo;
 
+    @Autowired
+    private MessageRepository messageRepo;
+
     @GetMapping("")
     public String viewHomePage() {
         return "index";
@@ -49,15 +52,20 @@ public class AppController {
 
     @GetMapping("/conversation")
     public String showConversation(Model model) {
-        model.addAttribute("prevMessage", new Message());
-        model.addAttribute("message", new Message());
-        return "conversation";
+        return setupAndGetConversationTemplate(model, new Message(), new Message());
     }
 
     @PostMapping("/conversation")
-    public String listConversation(Message prevMessage, Model model) {
+    public String listConversation(Model model, Message prevMessage) {
+        messageRepo.save(prevMessage);
+        return setupAndGetConversationTemplate( model, prevMessage, new Message());
+    }
+
+    private String setupAndGetConversationTemplate( Model model, Message prevMessage, Message attributeValue) {
+        List<Message> listMessages = messageRepo.findAll();
+        model.addAttribute("listMessages", listMessages);
         model.addAttribute("prevMessage", prevMessage);
-        model.addAttribute("message", new Message());
+        model.addAttribute("message", attributeValue);
         return "conversation";
     }
 
