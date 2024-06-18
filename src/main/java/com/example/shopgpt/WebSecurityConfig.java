@@ -37,7 +37,7 @@ public class WebSecurityConfig   {
         http.authenticationProvider(authenticationProvider());
 
         http.authorizeHttpRequests(auth ->
-                        auth.requestMatchers("/users").authenticated()
+                        auth.requestMatchers("/users","/conversation").authenticated()
                                 .anyRequest().permitAll()
                 )
                 .formLogin(login ->

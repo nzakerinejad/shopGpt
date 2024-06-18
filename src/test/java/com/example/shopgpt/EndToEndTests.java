@@ -1,14 +1,17 @@
 package com.example.shopgpt;
+import org.assertj.core.api.AbstractStringAssert;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -16,6 +19,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.assertj.core.api.Assertions.assertThat;
 
 
 @SpringBootTest
@@ -58,6 +62,7 @@ class EndToEndTests {
     }
 
     @Test
+    @WithMockUser(username = "user1", password = "pwd", roles = "USER")
     void showConversation() throws Exception {
         mockMvc.perform(
                 get("/conversation")
@@ -65,6 +70,7 @@ class EndToEndTests {
     }
 
     @Test
+    @WithMockUser(username = "user1", password = "pwd", roles = "USER")
     void whenSubmitShowConversationInPage() throws Exception {
         String inputMessage = "Hi";
         mockMvc.perform(
@@ -74,6 +80,7 @@ class EndToEndTests {
     }
 
     @Test
+    @WithMockUser(username = "user1", password = "pwd", roles = "USER")
     void whenSubmitTwoMessagesShowBoth() throws Exception {
         String inputMessage1 = "Hi1";
         String inputMessage2 = "Hi2";
@@ -85,6 +92,31 @@ class EndToEndTests {
                 post("/conversation")
                         .with(csrf()).param("text", inputMessage2)
         ).andExpect(status().isOk()).andExpect(content().string(containsString(inputMessage1))).andExpect(content().string(containsString(inputMessage2)));
+    }
+
+    @Test
+    void getAnErroingWhenTryingToAccessConversationWithoutLogin() throws Exception {
+
+        mockMvc.perform(get("/conversation").with(csrf())
+
+        ).andExpect(status().is3xxRedirection());
+
+    }
+
+    @Test
+    void whenUsersCanSeeTheirOwnConversations() throws Exception {
+        String inputMessage1 = "Hassan Hi 2";
+        mockMvc.perform(
+                post("/conversation").with(csrf()).with(user("hassan").password("kachal"))
+                        .param("text", inputMessage1)
+        );
+
+        mockMvc.perform(get("/conversation")
+                        .with(user("ali").password("kochooloo"))
+                ).andExpect(status().isOk()).andExpect(
+                        result -> {
+                            assertThat(result.getResponse().getContentAsString()).doesNotContain(inputMessage1);
+                        });
     }
 
 
