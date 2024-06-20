@@ -12,7 +12,7 @@
         <form th:action="@{/logout}" method="post">
             <p>
 <!--                Welcome <b><span sec:authentication="principal.fullName"></span></b>-->
-                wel nabeckam <span sec:authorize="isAuthenticated()" sec:authentication="principal.authorities">
+                welcome <span sec:authorize="isAuthenticated()" sec:authentication="principal.authorities"/>
             </p>
             <input type="submit" value="Sign Out" />
         </form>
@@ -33,7 +33,7 @@
             </thead>
             <tbody>
             <tr th:each="user: ${listUsers}">
-                <td th:text="${user.id}">User ID</td>
+                <td th:text="${user.userId}">User ID</td>
                 <td th:text="${user.email}">E-mail</td>
                 <td th:text="${user.firstName}">First Name</td>
                 <td th:text="${user.lastName}">Last Name</td>

@@ -1,12 +1,15 @@
 package com.example.shopgpt;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 
+import java.security.Principal;
 import java.util.List;
 
 @Controller
@@ -51,22 +54,31 @@ public class AppController {
     }
 
     @GetMapping("/conversation")
-    public String showConversation(Model model) {
-        return setupAndGetConversationTemplate(model, new Message(), new Message());
+    public String showConversation(Model model, Principal principal) {
+        User user = getUserByPrincipal(principal);
+        List<Message> listMessages = messageRepo.findMessagesByUserId(user.getUserId());
+        setupModelAttributes(model, user, listMessages, new Message());
+        return "conversation";
     }
 
     @PostMapping("/conversation")
-    public String listConversation(Model model, Message prevMessage) {
+    public String listConversation(Model model, @ModelAttribute("message") Message prevMessage, Principal principal) {
+        User user = getUserByPrincipal(principal);
+        prevMessage.setUser(user); // Associate message with the logged-in user
         messageRepo.save(prevMessage);
-        return setupAndGetConversationTemplate( model, prevMessage, new Message());
+        List<Message> listMessages = messageRepo.findMessagesByUserId(user.getUserId());
+        setupModelAttributes(model, user, listMessages, new Message());
+        return "conversation";
     }
 
-    private String setupAndGetConversationTemplate( Model model, Message prevMessage, Message attributeValue) {
-        List<Message> listMessages = messageRepo.findAll();
+    private User getUserByPrincipal(Principal principal) {
+        return userRepo.findByEmail(principal.getName());
+    }
+
+    private void setupModelAttributes(Model model, User user, List<Message> listMessages, Message newMessage) {
+        model.addAttribute("user", user);
         model.addAttribute("listMessages", listMessages);
-        model.addAttribute("prevMessage", prevMessage);
-        model.addAttribute("message", attributeValue);
-        return "conversation";
+        model.addAttribute("message", newMessage);
     }
 
 

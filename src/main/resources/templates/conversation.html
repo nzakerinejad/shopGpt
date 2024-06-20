@@ -1,11 +1,22 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity6">
 <head>
     <meta charset="UTF-8">
     <title>List Of Conversations</title>
+    <link rel="stylesheet" type="text/css" href="/webjars/bootstrap/css/bootstrap.min.css" />
+    <script type="text/javascript" src="/webjars/jquery/jquery.min.js"></script>
+    <script type="text/javascript" src="/webjars/bootstrap/js/bootstrap.min.js"></script>
 </head>
 <body>
 <div class="container text-center">
+    <div>
+        <form th:action="@{/logout}" method="post">
+            <p>
+                Welcome <b><span th:text="${user.firstName}">User</span></b>
+            </p>
+            <input type="submit" value="Sign Out" class="btn btn-danger" />
+        </form>
+    </div>
 
     <div>
         <h1>List of Messages</h1>
@@ -16,38 +27,30 @@
             <thead class="thead-dark">
             <tr>
                 <th>Message text</th>
-
             </tr>
             </thead>
             <tbody>
-            <tr th:each="message: ${listMessages}">
-                <td th:text="${message.text}">Message</td>
-
+            <tr th:each="message : ${listMessages}">
+                <td th:text="${message.content}">Message</td>
             </tr>
             </tbody>
         </table>
     </div>
+
     <div>
-
-    <form th:action="@{/conversation}" th:object="${message}"
-          method="post" style="max-width: 600px; margin: 0 auto;">
-        <div class="m-3">
-
-
-            <div class="form-group row">
-
-                <div class="col-8">
-                    <input type="text" th:field="*{text}" />
+        <form th:action="@{/conversation}" th:object="${message}" method="post" style="max-width: 600px; margin: 0 auto;">
+            <div class="m-3">
+                <div class="form-group row">
+                    <div class="col-8">
+                        <input type="text" th:field="*{content}" class="form-control" placeholder="Enter your message" />
+                    </div>
+                </div>
+                <div>
+                    <button type="submit" class="btn btn-primary">Submit</button>
                 </div>
             </div>
-
-
-            <div>
-                <button TYPE="submit" class="btn btn-primary">Submit</button>
-            </div>
-        </div>
-    </form>
+        </form>
+    </div>
 </div>
-
 </body>
 </html>
