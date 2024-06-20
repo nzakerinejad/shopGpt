@@ -1,13 +1,11 @@
 package com.example.shopgpt;
-import org.assertj.core.api.AbstractStringAssert;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
@@ -62,16 +60,23 @@ class EndToEndTests {
 				.content("email=hassan%40daf.cfd&password=bbbasdf&firstName=hassanFirstName&lastName=bbb")
 				).andExpect(status().isOk());
 
-        mockMvc.perform(get("/users").with(user("admin").password("pass"))).andExpect(status().isOk()).andExpect(content().string(containsString("hassanFirstName")));
+        mockMvc.perform(get("/users").with(user("admin").roles("ADMIN").password("pass"))).andExpect(status().isOk()).andExpect(content().string(containsString("hassanFirstName")));
     }
 
     @Test
     @WithMockUser(username = "user@hassan.com", password = "pwd", roles = "USER")
-    void showUsers() throws Exception {
+    void doNotShowUsersToNotAdmin() throws Exception {
+        mockMvc.perform(get("/users"))
+                .andExpect(status().isForbidden());
+    }
+    @Test
+    @WithMockUser(username = "admin", password = "pass", roles = "ADMIN")
+    void showUsersOnlyToAdmin() throws Exception {
         mockMvc.perform(
                 get("/users")
         ).andExpect(status().isOk());
     }
+
 
     @Test
     void showConversationButton() throws Exception{

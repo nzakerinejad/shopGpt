@@ -2,12 +2,15 @@ package com.example.shopgpt;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.AccessDeniedHandlerImpl;
+import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 
 @Configuration
 public class WebSecurityConfig   {
@@ -36,17 +39,25 @@ public class WebSecurityConfig   {
 
         http.authenticationProvider(authenticationProvider());
 
-        http.authorizeHttpRequests(auth ->
-                        auth.requestMatchers("/users","/conversation").authenticated()
-                                .anyRequest().permitAll()
-                )
+        http.authorizeHttpRequests(auth -> {
+                    auth.requestMatchers("/users").hasRole("ADMIN")
+                            .requestMatchers("/conversation").authenticated()
+                            .anyRequest().permitAll();
+                })
                 .formLogin(login ->
                         login.usernameParameter("email")
-                                .defaultSuccessUrl("/users")
+                                .defaultSuccessUrl("/conversation")
                                 .permitAll()
                 )
-                .logout(logout -> logout.logoutSuccessUrl("/").permitAll()
-                );
+                .logout(logout -> logout.logoutSuccessUrl("/").permitAll());
+//                .exceptionHandling(exception -> exception
+//                        .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
+//                        .accessDeniedHandler(new AccessDeniedHandlerImpl() {
+//                            {
+//                                setErrorPage("/error/401");
+//                            }
+//                        }) // Custom entry point for access denied
+//                );
 
         return http.build();
     }
