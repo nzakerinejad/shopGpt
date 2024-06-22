@@ -144,5 +144,16 @@ class EndToEndTests {
                         });
     }
 
+    @Test
+    @WithMockUser(username = "user@hassan.com", password = "pwd", roles = "USER")
+    void doesNotShowUSersLinkToNotAdminUsers() throws Exception {
+        mockMvc.perform(
+                get("/")
+        ).andExpect(status().isOk()).andExpect(
+                result -> {
+                    assertThat(result.getResponse().getContentAsString()).doesNotContain("Users");
+                });
+    }
+
 
 }
