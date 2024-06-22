@@ -2,7 +2,6 @@ package com.example.shopgpt;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -48,14 +47,6 @@ public class WebSecurityConfig   {
                                 .permitAll()
                 )
                 .logout(logout -> logout.logoutSuccessUrl("/").permitAll());
-//                .exceptionHandling(exception -> exception
-//                        .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
-//                        .accessDeniedHandler(new AccessDeniedHandlerImpl() {
-//                            {
-//                                setErrorPage("/error/401");
-//                            }
-//                        }) // Custom entry point for access denied
-//                );
 
         return http.build();
     }

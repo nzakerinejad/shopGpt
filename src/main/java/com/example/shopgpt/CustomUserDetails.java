@@ -18,7 +18,7 @@ public class CustomUserDetails implements UserDetails {
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         if (getUsername().equals("admin@admin.com"))
-            return List.of(new SimpleGrantedAuthority("ADMIN"));
+            return List.of(new SimpleGrantedAuthority("ROLE_ADMIN"));
         return null;
     }
 
