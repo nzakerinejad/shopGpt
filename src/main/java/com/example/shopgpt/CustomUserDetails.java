@@ -1,8 +1,10 @@
 package com.example.shopgpt;
 
 import java.util.Collection;
+import java.util.List;
 
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 public class CustomUserDetails implements UserDetails {
@@ -15,6 +17,8 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
+        if (getUsername().equals("admin@admin.com"))
+            return List.of(new SimpleGrantedAuthority("ADMIN"));
         return null;
     }
 
