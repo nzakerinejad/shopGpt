@@ -8,6 +8,12 @@
     <script type="text/javascript" src="/webjars/bootstrap/js/bootstrap.min.js"></script>
 </head>
 <body>
+<div>
+    <!-- Button to navigate to index page -->
+    <a th:href="@{/index}" class="btn btn-success">
+        <i class="fa fa-arrow-circle-o-left"></i>&nbsp;Back to home
+    </a>
+</div>
 <div class="container text-center">
     <div>
         <form th:action="@{/logout}" method="post">
