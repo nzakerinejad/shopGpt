@@ -1,6 +1,7 @@
 package com.example.shopgpt;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
@@ -65,14 +66,31 @@ public class AppController {
         return getString(model, user);
     }
 
-    private User getUserByPrincipal(Principal principal) {
-        return userRepo.findByEmail(principal.getName());
+    @GetMapping("/conversation/{email}")
+    public String showUserConversationForAdmin(Model model, @PathVariable String email) {
+        User user = userRepo.findByEmail(email);
+        return getString(model, user);
     }
 
-    private void setupModelAttributes(Model model, User user, List<Message> listMessages, Message newMessage) {
-        model.addAttribute("user", user);
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PostMapping("/conversation/{email}")
+    public String sendMessageInUSerPageByAdmin(Model model, @PathVariable String email, @ModelAttribute("message") Message prevMessage, Principal principal) {
+
+        User admin = getUserByPrincipal(principal);
+        User user = userRepo.findByEmail(email);
+        prevMessage.setUser(user); // Associate message with the logged-in user
+        messageRepo.save(prevMessage);
+        List<Message> listMessages = messageRepo.findMessagesByUserId(user.getUserId());
+
+        model.addAttribute("user", admin);
         model.addAttribute("listMessages", listMessages);
-        model.addAttribute("message", newMessage);
+        model.addAttribute("message", new Message());
+
+        return "conversation";
+    }
+
+    private User getUserByPrincipal(Principal principal) {
+        return userRepo.findByEmail(principal.getName());
     }
 
     private String getString(Model model, User user) {
@@ -81,13 +99,11 @@ public class AppController {
         return "conversation";
     }
 
-    @GetMapping("/conversation/{email}")
-    public String showUserConversationForAdmin(Model model, @PathVariable String email) {
-        User user = userRepo.findByEmail(email);
-        return getString(model, user);
+    private void setupModelAttributes(Model model, User user, List<Message> listMessages, Message newMessage) {
+        model.addAttribute("user", user);
+        model.addAttribute("listMessages", listMessages);
+        model.addAttribute("message", newMessage);
     }
-
-
 
 }
 

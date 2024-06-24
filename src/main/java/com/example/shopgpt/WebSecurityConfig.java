@@ -38,6 +38,7 @@ public class WebSecurityConfig   {
 
         http.authorizeHttpRequests(auth -> {
                     auth.requestMatchers("/users").hasRole("ADMIN")
+                            .requestMatchers("/conversation/{email}").hasRole("ADMIN")
                             .requestMatchers("/conversation").authenticated()
                             .anyRequest().permitAll();
                 })
