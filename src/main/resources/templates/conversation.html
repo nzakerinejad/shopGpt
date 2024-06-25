@@ -32,11 +32,16 @@
         <table class="table table-striped table-bordered">
             <thead class="thead-dark">
             <tr>
+                <th>Sender:</th>
                 <th>Message text</th>
             </tr>
             </thead>
             <tbody>
             <tr th:each="message : ${listMessages}">
+                <td>
+                    <span th:if="${message.itFromAdmin}" >Admin:</span>
+                    <span th:unless="${message.itFromAdmin}" th:text="${user.firstName + ':'}">User:</span>
+                </td>
                 <td th:text="${message.content}">Message</td>
             </tr>
             </tbody>

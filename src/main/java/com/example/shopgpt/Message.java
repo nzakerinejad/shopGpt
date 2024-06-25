@@ -1,6 +1,7 @@
 package com.example.shopgpt;
 
 import jakarta.persistence.*;
+import org.hibernate.type.NumericBooleanConverter;
 
 
 @Entity
@@ -14,6 +15,9 @@ public class Message {
 
     @Column(nullable = false, unique = false, length = 1000)
     private String content;
+
+    @Column(columnDefinition = "boolean default false")
+    private Boolean isItFromAdmin;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
@@ -41,5 +45,13 @@ public class Message {
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+    public Boolean getItFromAdmin() {
+        return isItFromAdmin;
+    }
+
+    public void setItFromAdmin(Boolean itFromAdmin) {
+        isItFromAdmin = itFromAdmin;
     }
 }

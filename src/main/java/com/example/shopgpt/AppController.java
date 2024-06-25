@@ -79,10 +79,11 @@ public class AppController {
         User admin = getUserByPrincipal(principal);
         User user = userRepo.findByEmail(email);
         prevMessage.setUser(user); // Associate message with the logged-in user
+        prevMessage.setItFromAdmin(true);
         messageRepo.save(prevMessage);
         List<Message> listMessages = messageRepo.findMessagesByUserId(user.getUserId());
 
-        model.addAttribute("user", admin);
+        model.addAttribute("user", user);
         model.addAttribute("listMessages", listMessages);
         model.addAttribute("message", new Message());
 
