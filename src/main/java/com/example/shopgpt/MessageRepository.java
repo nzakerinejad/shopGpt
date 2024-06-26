@@ -7,6 +7,6 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 
 public interface MessageRepository extends JpaRepository<Message, Long> {
-    @Query("SELECT m FROM Message m WHERE m.user.userId = :userId")
-    List<Message> findMessagesByUserId(@Param("userId") Long userId);
+    @Query("SELECT m FROM Message m WHERE m.conversation.conversationId = :conversationId")
+    List<Message> findMessagesByConversationId(@Param("conversationId") Long conversationId);
 }

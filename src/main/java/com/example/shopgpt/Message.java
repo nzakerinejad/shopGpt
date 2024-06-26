@@ -20,8 +20,9 @@ public class Message {
     private Boolean isItFromAdmin;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    @JoinColumn(name = "conversation_id", nullable = false)
+    private Conversation conversation;
+
 
     public Long getMessageId() {
         return messageId;
@@ -39,14 +40,6 @@ public class Message {
         this.content = content;
     }
 
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
-    }
-
     public Boolean getItFromAdmin() {
         return isItFromAdmin;
     }
@@ -54,4 +47,13 @@ public class Message {
     public void setItFromAdmin(Boolean itFromAdmin) {
         isItFromAdmin = itFromAdmin;
     }
+
+    public Conversation getConversation() {
+        return conversation;
+    }
+
+    public void setConversation(Conversation conversation) {
+        this.conversation = conversation;
+    }
+
 }

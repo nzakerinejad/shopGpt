@@ -39,7 +39,7 @@ public class WebSecurityConfig   {
         http.authorizeHttpRequests(auth -> {
                     auth.requestMatchers("/users").hasRole("ADMIN")
                             .requestMatchers("/conversation/{email}").hasRole("ADMIN")
-                            .requestMatchers("/conversation").authenticated()
+                            .requestMatchers("/conversation", "/chat").authenticated()
                             .anyRequest().permitAll();
                 })
                 .formLogin(login ->

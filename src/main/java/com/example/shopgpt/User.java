@@ -3,7 +3,6 @@ package com.example.shopgpt;
 import jakarta.persistence.*;
 
 import java.util.List;
-import java.util.Set;
 
 @Entity
 @Table(name = "users")
@@ -27,7 +26,8 @@ public class User {
     private String lastName;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Message> messages;
+    private List<Conversation> conversations;
+
 
     public Long getUserId() {
         return userId;
@@ -69,12 +69,13 @@ public class User {
         this.lastName = lastName;
     }
 
-    public List<Message> getMessages() {
-        return messages;
+    public List<Conversation> getConversations() {
+        return conversations;
     }
 
-    public void setMessages(List<Message> messages) {
-        this.messages = messages;
+    public void setConversations(List<Conversation> conversations) {
+        this.conversations = conversations;
     }
+
 
 }
