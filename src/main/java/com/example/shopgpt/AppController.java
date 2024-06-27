@@ -1,6 +1,7 @@
 package com.example.shopgpt;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -8,6 +9,7 @@ import org.springframework.ui.Model;
 
 import java.security.Principal;
 import java.util.List;
+import java.util.Optional;
 
 @Controller
 public class AppController {
@@ -53,11 +55,11 @@ public class AppController {
         return "users";
     }
 
-    @GetMapping("/conversation")
-    public String showConversation(Model model, Principal principal) {
-        User user = getUserByPrincipal(principal);
-        return getString(model, user);
-    }
+//    @GetMapping("/conversation")
+//    public String showConversation(Model model, Principal principal) {
+//        User user = getUserByPrincipal(principal);
+//        return getString(model, user);
+//    }
 
 //    @PostMapping("/conversation")
 //    public String listConversation(Model model, @ModelAttribute("message") Message prevMessage, Principal principal) {
@@ -67,11 +69,11 @@ public class AppController {
 //        return getString(model, user);
 //    }
 
-    @GetMapping("/conversation/{email}")
-    public String showUserConversationForAdmin(Model model, @PathVariable String email) {
-        User user = userRepo.findByEmail(email);
-        return getString(model, user);
-    }
+//    @GetMapping("/conversation/{email}")
+//    public String showUserConversationForAdmin(Model model, @PathVariable String email) {
+//        User user = userRepo.findByEmail(email);
+//        return getString(model, user);
+//    }
 
 //    @PreAuthorize("hasRole('ROLE_ADMIN')")
 //    @PostMapping("/conversation/{email}")
@@ -91,6 +93,79 @@ public class AppController {
 //        return "conversation";
 //    }
 
+
+    @GetMapping("/chat")
+    public String showConversationInChat(Model model, Principal principal) {
+        User user = getUserByPrincipal(principal);
+        prepareModelForChat(model, user);
+        return "chatPage";
+    }
+
+    @GetMapping("/conversation")
+    public String showConversation(Model model, Principal principal, @RequestParam("conversationId") Optional<Long> conversationId) {
+        User user = getUserByPrincipal(principal);
+
+        Conversation conversation;
+        if (conversationId.isPresent()) {
+            conversation = conversationRepo.findById(conversationId.get())
+                    .orElseGet(() -> createNewConversation(user));
+        } else {
+            conversation = createNewConversation(user);
+        }
+
+        List<Message> listMessages = messageRepo.findMessagesByConversationId(conversation.getConversationId());
+
+        model.addAttribute("user", user);
+        model.addAttribute("listMessages", listMessages);
+        model.addAttribute("message", new Message());
+        model.addAttribute("conversation", conversation);
+
+        return "conversation";
+    }
+
+
+    @PostMapping("/conversation")
+    public String submitMessage(Model model, Principal principal, @ModelAttribute Message preMessage,
+                                @RequestParam("conversationId") Optional<Long> conversationId) {
+        User user = getUserByPrincipal(principal);
+
+        Conversation conversation;
+        if (conversationId.isPresent()) {
+            conversation = conversationRepo.findById(conversationId.get())
+                    .orElseGet(() -> createNewConversation(user));
+        } else {
+            conversation = createNewConversation(user);
+        }
+
+
+        preMessage.setConversation(conversation);
+        messageRepo.save(preMessage);
+        List<Message> listMessages = messageRepo.findMessagesByConversationId(conversation.getConversationId());
+        model.addAttribute("user", user);
+        model.addAttribute("listMessages", listMessages);
+        model.addAttribute("message", new Message());
+
+        return "conversation";
+    }
+
+    private Conversation createNewConversation(User user) {
+        Conversation conversation = new Conversation();
+        conversation.setUser(user);
+        conversation = conversationRepo.save(conversation);
+        return conversation;
+    }
+
+
+    private void prepareModelForChat(Model model, User user) {
+        List<Conversation> listConversations = conversationRepo.findConversationsByUserId(user.getUserId());
+        model.addAttribute("user", user);
+        model.addAttribute("listConversations", listConversations);
+    }
+
+
+
+
+
     private User getUserByPrincipal(Principal principal) {
         return userRepo.findByEmail(principal.getName());
     }
@@ -106,27 +181,6 @@ public class AppController {
         model.addAttribute("user", user);
         model.addAttribute("listMessages", listMessages);
         model.addAttribute("message", newMessage);
-    }
-
-    @GetMapping("/chat")
-    public String showConversationInChat(Model model, Principal principal) {
-        User user = getUserByPrincipal(principal);
-       prepareModelForChat(model, user);
-        return "chatPage";
-    }
-
-//    @PostMapping("/chat")
-//    public String listConversation(Model model, @ModelAttribute("message") Message prevMessage, Principal principal) {
-//        User user = getUserByPrincipal(principal);
-//        prevMessage.setUser(user); // Associate message with the logged-in user
-//        messageRepo.save(prevMessage);
-//        return getString(model, user);
-
-
-    private void prepareModelForChat(Model model, User user) {
-        List<Conversation> listConversations = conversationRepo.findConversationsByUserId(user.getUserId());
-        model.addAttribute("user", user);
-        model.addAttribute("listMessages", listConversations);
     }
 
 }

@@ -44,7 +44,7 @@ public class WebSecurityConfig   {
                 })
                 .formLogin(login ->
                         login.usernameParameter("email")
-                                .defaultSuccessUrl("/conversation")
+                                .defaultSuccessUrl("/chat")
                                 .permitAll()
                 )
                 .logout(logout -> logout.logoutSuccessUrl("/").permitAll());
