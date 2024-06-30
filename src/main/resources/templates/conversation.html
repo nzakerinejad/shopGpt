@@ -45,13 +45,16 @@
 
 
     <div sec:authorize="!hasAuthority('ROLE_ADMIN')">
-        <form th:action="@{/conversation}" th:object="${message}" method="post" style="max-width: 600px; margin: 0 auto;">
+        <form th:action="@{/conversation}" th:object="${formMessage}" method="post" style="max-width: 600px; margin: 0 auto;">
             <div class="m-3">
                 <div class="form-group row">
                     <div class="col-8">
                         <input type="text" th:field="*{content}" class="form-control" placeholder="Enter your message" />
                     </div>
-<!--                    <input type="text" th:field="*{conversationId}" th:value="${inputConversationId}" />-->
+                    <div class="col-8">
+                        <input type="text" th:field="*{conversationId}" class="form-control" />
+                    </div>
+
                 </div>
                 <div>
                     <button type="submit" class="btn btn-primary">Submit</button>

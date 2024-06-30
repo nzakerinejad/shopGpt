@@ -33,7 +33,8 @@
             </thead>
             <tbody>
             <tr th:each="conversation : ${listConversations}">
-                <td> <a th:text="${conversation.conversationId}" th:href="@{/conversation/{conversationId}(id=${conversation.conversationId})}">
+                <td> <a th:text="${conversation.conversationId}" th:href="@{/conversation/{conversationId}(conversationId=${conversation.conversationId})}">
+
                     Conversation
                 </a>
             </td>

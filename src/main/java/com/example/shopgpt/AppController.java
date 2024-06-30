@@ -1,7 +1,6 @@
 package com.example.shopgpt;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -101,62 +100,42 @@ public class AppController {
         return "chatPage";
     }
 
-    @GetMapping("/conversation")
-    public String showConversation(Model model, Principal principal) {
-        User user = getUserByPrincipal(principal);
-
-        var conversation = createNewConversation(user);
-
-        List<Message> listMessages = messageRepo.findMessagesByConversationId(conversation.getConversationId());
-
-        model.addAttribute("user", user);
-        model.addAttribute("listMessages", listMessages);
-        model.addAttribute("message", new Message());
-//        model.addAttribute("conversation", conversation);
-        model.addAttribute("inputConversationId", conversation.getConversationId());
-
-        return "conversation";
-    }
-
-    @GetMapping("/conversation/{conversationId}")
-    public String showSpecificConversation(Model model, Principal principal, @PathVariable("conversationId") Long conversationId) {
-        User user = getUserByPrincipal(principal);
-
-//        Conversation conversation = conversationRepo.findByConversationId(conversationId);
-
-        List<Message> listMessages = messageRepo.findMessagesByConversationId(conversationId);
-
-        model.addAttribute("user", user);
-        model.addAttribute("listMessages", listMessages);
-        model.addAttribute("message", new Message());
-        model.addAttribute("inputConversationId", conversationId.toString());
-        return "conversation";
-    }
-
-
-    @PostMapping("/conversation")
-    public String submitMessage(Model model, Principal principal, @ModelAttribute Message preMessage,
-                                @RequestParam("conversationId") Optional<Long> conversationId) {
-        User user = getUserByPrincipal(principal);
-
-        Conversation conversation;
+    @GetMapping({"/conversation/{conversationId}","/conversation"})
+    public String showSpecificConversation(Model model, Principal principal, @PathVariable("conversationId") Optional<Long> conversationId) {
+        Long theId;
         if (conversationId.isPresent()) {
-            conversation = conversationRepo.findById(conversationId.get())
-                    .orElseGet(() -> createNewConversation(user));
+            theId = conversationId.get();
         } else {
-            conversation = createNewConversation(user);
+            User user = getUserByPrincipal(principal);
+            var conversation = createNewConversation(user);
+            theId = conversation.getConversationId();
         }
 
+        return renderConversationTemplate(theId, principal, model, "formMessage");
+    }
 
-        preMessage.setConversation(conversation);
-        messageRepo.save(preMessage);
-        List<Message> listMessages = messageRepo.findMessagesByConversationId(conversation.getConversationId());
+    @PostMapping("/conversation")
+    public String submitMessage(Model model, Principal principal, @ModelAttribute FormMessage preMessage) {
+        var inputConversationId = Long.parseLong(preMessage.conversationId);
+        var conversation = conversationRepo.findByConversationId(inputConversationId);
+        var messageToSave = new Message();
+        messageToSave.setConversation(conversation);
+        messageToSave.setContent(preMessage.content);
+        messageRepo.save(messageToSave);
+        return renderConversationTemplate(inputConversationId, principal, model, "message");
+    }
+
+    private String renderConversationTemplate(Long theId, Principal principal, Model model, String formMessage) {
+        List<Message> listMessages = messageRepo.findMessagesByConversationId(theId);
+        User user = getUserByPrincipal(principal);
         model.addAttribute("user", user);
         model.addAttribute("listMessages", listMessages);
-        model.addAttribute("message", new Message());
-
+        model.addAttribute(formMessage, new FormMessage("", theId.toString()));
         return "conversation";
     }
+
+    record FormMessage(String content, String conversationId){  }
+
 
     private Conversation createNewConversation(User user) {
         Conversation con = new Conversation();
