@@ -4,10 +4,13 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+
+import static org.springframework.security.config.Customizer.withDefaults;
 
 @Configuration
 public class WebSecurityConfig   {
@@ -34,21 +37,20 @@ public class WebSecurityConfig   {
     @Bean
     SecurityFilterChain configure(HttpSecurity http) throws Exception {
 
-        http.authenticationProvider(authenticationProvider());
-
-        http.authorizeHttpRequests(auth -> {
-                    auth.requestMatchers("/users").hasRole("ADMIN")
-                            .requestMatchers("/conversation/{email}").hasRole("ADMIN")
-                            .requestMatchers("/conversation", "/chat").authenticated()
-                            .anyRequest().permitAll();
+        return http
+                .authenticationProvider(authenticationProvider())
+                .authorizeHttpRequests(auth -> {auth
+                        .requestMatchers("/users").hasRole("ADMIN")
+                        .requestMatchers("/conversation_admin/{email}").hasRole("ADMIN")
+                        .requestMatchers("/conversation", "/chat", "/conversation/{conversationId}").authenticated()
+                        .anyRequest().permitAll();
                 })
-                .formLogin(login ->
-                        login.usernameParameter("email")
-                                .defaultSuccessUrl("/chat")
-                                .permitAll()
-                )
-                .logout(logout -> logout.logoutSuccessUrl("/").permitAll());
-
-        return http.build();
+                .formLogin(login -> login
+                        .usernameParameter("email")
+                        .defaultSuccessUrl("/chat")
+                        .permitAll())
+                .rememberMe(rememberMe -> rememberMe.key("uniqueAndSecret"))
+                .logout(logout -> logout.logoutSuccessUrl("/").permitAll())
+                .build();
     }
 }

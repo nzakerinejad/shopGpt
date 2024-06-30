@@ -102,24 +102,34 @@ public class AppController {
     }
 
     @GetMapping("/conversation")
-    public String showConversation(Model model, Principal principal, @RequestParam("conversationId") Optional<Long> conversationId) {
+    public String showConversation(Model model, Principal principal) {
         User user = getUserByPrincipal(principal);
 
-        Conversation conversation;
-        if (conversationId.isPresent()) {
-            conversation = conversationRepo.findById(conversationId.get())
-                    .orElseGet(() -> createNewConversation(user));
-        } else {
-            conversation = createNewConversation(user);
-        }
+        var conversation = createNewConversation(user);
 
         List<Message> listMessages = messageRepo.findMessagesByConversationId(conversation.getConversationId());
 
         model.addAttribute("user", user);
         model.addAttribute("listMessages", listMessages);
         model.addAttribute("message", new Message());
-        model.addAttribute("conversation", conversation);
+//        model.addAttribute("conversation", conversation);
+        model.addAttribute("inputConversationId", conversation.getConversationId());
 
+        return "conversation";
+    }
+
+    @GetMapping("/conversation/{conversationId}")
+    public String showSpecificConversation(Model model, Principal principal, @PathVariable("conversationId") Long conversationId) {
+        User user = getUserByPrincipal(principal);
+
+//        Conversation conversation = conversationRepo.findByConversationId(conversationId);
+
+        List<Message> listMessages = messageRepo.findMessagesByConversationId(conversationId);
+
+        model.addAttribute("user", user);
+        model.addAttribute("listMessages", listMessages);
+        model.addAttribute("message", new Message());
+        model.addAttribute("inputConversationId", conversationId.toString());
         return "conversation";
     }
 
@@ -149,10 +159,9 @@ public class AppController {
     }
 
     private Conversation createNewConversation(User user) {
-        Conversation conversation = new Conversation();
-        conversation.setUser(user);
-        conversation = conversationRepo.save(conversation);
-        return conversation;
+        Conversation con = new Conversation();
+        con.setUser(user);
+        return conversationRepo.save(con);
     }
 
 

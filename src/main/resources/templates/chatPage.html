@@ -33,7 +33,10 @@
             </thead>
             <tbody>
             <tr th:each="conversation : ${listConversations}">
-                <td th:text="${conversation.conversationId}">Conversation</td>
+                <td> <a th:text="${conversation.conversationId}" th:href="@{/conversation/{conversationId}(id=${conversation.conversationId})}">
+                    Conversation
+                </a>
+            </td>
             </tr>
             </tbody>
         </table>
