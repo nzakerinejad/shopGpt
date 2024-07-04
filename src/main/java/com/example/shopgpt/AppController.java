@@ -136,7 +136,6 @@ public class AppController {
 
     record FormMessage(String content, String conversationId){  }
 
-
     private Conversation createNewConversation(User user) {
         Conversation con = new Conversation();
         con.setUser(user);
@@ -145,9 +144,10 @@ public class AppController {
 
 
     private void prepareModelForChat(Model model, User user) {
-        List<Conversation> listConversations = conversationRepo.findConversationsByUserId(user.getUserId());
         model.addAttribute("user", user);
-        model.addAttribute("listConversations", listConversations);
+        List<Conversation> conversationsByUserId = conversationRepo.findConversationsByUserId(user.getUserId());
+        List<Long> convIds = conversationsByUserId.stream().map(conversation -> conversation.getConversationId()).toList();
+        model.addAttribute("listConversations", convIds);
     }
 
 
