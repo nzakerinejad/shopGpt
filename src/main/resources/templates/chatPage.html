@@ -24,7 +24,25 @@
         </form>
     </div>
 
-    <div>
+    <div sec:authorize="hasAuthority('ROLE_ADMIN')">Text visible to admin.
+        <table class="table table-striped table-bordered">
+            <thead class="thead-dark">
+            <tr>
+                <th>List of Conversations</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="id : ${listConversations}">
+                <td> <a th:text="${id}" th:href="@{/admin_conversation/{conversationId}(conversationId=${id})}">
+                </a>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+
+    <div sec:authorize="!hasAuthority('ROLE_ADMIN')">
         <table class="table table-striped table-bordered">
             <thead class="thead-dark">
             <tr>
@@ -42,7 +60,7 @@
     </div>
     <div class="container text-center">
         <div>
-            <!-- Button to navigate to index page -->
+            <!-- Button to navigate to conversation page -->
 
             <a th:href="@{/conversation}" class="btn btn-success">
                 Create a new Conversation

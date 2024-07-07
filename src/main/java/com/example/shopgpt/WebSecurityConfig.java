@@ -41,7 +41,7 @@ public class WebSecurityConfig   {
                 .authenticationProvider(authenticationProvider())
                 .authorizeHttpRequests(auth -> {auth
                         .requestMatchers("/users").hasRole("ADMIN")
-                        .requestMatchers("/conversation_admin/{email}").hasRole("ADMIN")
+                        .requestMatchers("/admin_chat/{email}", "/admin_conversation/{conversationId}").hasRole("ADMIN")
                         .requestMatchers("/conversation", "/chat", "/conversation/{conversationId}").authenticated()
                         .anyRequest().permitAll();
                 })

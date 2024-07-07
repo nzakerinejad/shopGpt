@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.ui.Model;
 
 import java.security.Principal;
+import java.sql.SQLOutput;
 import java.util.List;
 import java.util.Optional;
 
@@ -100,6 +101,31 @@ public class AppController {
         return "chatPage";
     }
 
+    @GetMapping("/admin_chat/{email}")
+    public String showUserChatPageToAdmin(Model model, @PathVariable String email) {
+        User user = userRepo.findByEmail(email);
+        prepareModelForChat(model, user);
+        return "chatPage";
+    }
+
+    @GetMapping({"/admin_conversation/{conversationId}"})
+    public String showUserSpecificConversationToAdmin(Model model, Principal principal, @PathVariable("conversationId") Long conversationId) {
+        Long theId = conversationId;
+
+        List<Message> listMessages = messageRepo.findMessagesByConversationId(theId);
+        var c = conversationRepo.findByConversationId(theId);
+        System.out.println(c.getConversationId());
+        var user = c.getUser();
+        System.out.println(user.getFirstName());
+
+
+        model.addAttribute("user", user);
+        model.addAttribute("listMessages", listMessages);
+        model.addAttribute("formMessage", new FormMessage("", theId.toString()));
+        return "conversation";
+
+    }
+
     @GetMapping({"/conversation/{conversationId}","/conversation"})
     public String showSpecificConversation(Model model, Principal principal, @PathVariable("conversationId") Optional<Long> conversationId) {
         Long theId;
@@ -116,7 +142,7 @@ public class AppController {
 
     @PostMapping("/conversation")
     public String submitMessage(Model model, Principal principal, @ModelAttribute FormMessage preMessage) {
-        var inputConversationId = Long.parseLong(preMessage.conversationId);
+        var inputConversationId = Long.parseLong(preMessage.conversationId());
         var conversation = conversationRepo.findByConversationId(inputConversationId);
         var messageToSave = new Message();
         messageToSave.setConversation(conversation);
@@ -130,7 +156,7 @@ public class AppController {
         User user = getUserByPrincipal(principal);
         model.addAttribute("user", user);
         model.addAttribute("listMessages", listMessages);
-        model.addAttribute(formMessage, new FormMessage("", theId.toString()));
+        model.addAttribute("formMessage", new FormMessage("", theId.toString()));
         return "conversation";
     }
 
@@ -149,9 +175,6 @@ public class AppController {
         List<Long> convIds = conversationsByUserId.stream().map(conversation -> conversation.getConversationId()).toList();
         model.addAttribute("listConversations", convIds);
     }
-
-
-
 
 
     private User getUserByPrincipal(Principal principal) {

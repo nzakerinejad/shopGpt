@@ -35,7 +35,7 @@
             <tr th:each="user: ${listUsers}">
                 <td th:text="${user.userId}">User ID</td>
                 <td>
-                    <a th:text="${user.email}" th:href="@{/conversation/{email}(email=${user.email})}">E-mail</a>
+                    <a th:text="${user.email}" th:href="@{/admin_chat/{email}(email=${user.email})}">E-mail</a>
                 </td>
                 <td th:text="${user.firstName}">First Name</td>
                 <td th:text="${user.lastName}">Last Name</td>
