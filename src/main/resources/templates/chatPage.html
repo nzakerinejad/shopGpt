@@ -18,7 +18,7 @@
     <div class="container text-center">
         <form th:action="@{/logout}" method="post">
             <p>
-                Welcome <b><span th:text="${user.firstName}">User</span></b>
+                Welcome <b><span th:text="${loggedInUser.firstName}">loggedInUser</span></b>
             </p>
             <input type="submit" value="Sign Out" class="btn btn-danger" />
         </form>
@@ -57,17 +57,16 @@
             </tr>
             </tbody>
         </table>
-    </div>
-    <div class="container text-center">
-        <div>
-            <!-- Button to navigate to conversation page -->
+        <div class="container text-center">
+            <div>
+                <!-- Button to navigate to conversation page -->
 
-            <a th:href="@{/conversation}" class="btn btn-success">
-                Create a new Conversation
-            </a>
+                <a th:href="@{/conversation}" class="btn btn-success">
+                    Create a new Conversation
+                </a>
+            </div>
         </div>
     </div>
-
 
 </div>
 

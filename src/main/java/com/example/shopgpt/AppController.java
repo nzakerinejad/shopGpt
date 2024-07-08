@@ -1,13 +1,13 @@
 package com.example.shopgpt;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.ui.Model;
 
 import java.security.Principal;
-import java.sql.SQLOutput;
 import java.util.List;
 import java.util.Optional;
 
@@ -55,78 +55,63 @@ public class AppController {
         return "users";
     }
 
-//    @GetMapping("/conversation")
-//    public String showConversation(Model model, Principal principal) {
-//        User user = getUserByPrincipal(principal);
-//        return getString(model, user);
-//    }
-
-//    @PostMapping("/conversation")
-//    public String listConversation(Model model, @ModelAttribute("message") Message prevMessage, Principal principal) {
-//        User user = getUserByPrincipal(principal);
-//        prevMessage.setUser(user); // Associate message with the logged-in user
-//        messageRepo.save(prevMessage);
-//        return getString(model, user);
-//    }
-
-//    @GetMapping("/conversation/{email}")
-//    public String showUserConversationForAdmin(Model model, @PathVariable String email) {
-//        User user = userRepo.findByEmail(email);
-//        return getString(model, user);
-//    }
-
-//    @PreAuthorize("hasRole('ROLE_ADMIN')")
-//    @PostMapping("/conversation/{email}")
-//    public String sendMessageInUSerPageByAdmin(Model model, @PathVariable String email, @ModelAttribute("message") Message prevMessage, Principal principal) {
-//
-//        User admin = getUserByPrincipal(principal);
-//        User user = userRepo.findByEmail(email);
-//        prevMessage.setUser(user); // Associate message with the logged-in user
-//        prevMessage.setItFromAdmin(true);
-//        messageRepo.save(prevMessage);
-//        List<Message> listMessages = messageRepo.findMessagesByUserId(user.getUserId());
-//
-//        model.addAttribute("user", user);
-//        model.addAttribute("listMessages", listMessages);
-//        model.addAttribute("message", new Message());
-//
-//        return "conversation";
-//    }
-
 
     @GetMapping("/chat")
     public String showConversationInChat(Model model, Principal principal) {
         User user = getUserByPrincipal(principal);
-        prepareModelForChat(model, user);
+        var loggedInUser = user;
+        prepareModelForChat(model, user, loggedInUser);
         return "chatPage";
     }
 
     @GetMapping("/admin_chat/{email}")
-    public String showUserChatPageToAdmin(Model model, @PathVariable String email) {
+    public String showUserChatPageToAdmin(Model model, Principal principal, @PathVariable String email) {
         User user = userRepo.findByEmail(email);
-        prepareModelForChat(model, user);
+        var loggedInUser = getUserByPrincipal(principal);
+        prepareModelForChat(model, user, loggedInUser);
         return "chatPage";
     }
 
     @GetMapping({"/admin_conversation/{conversationId}"})
     public String showUserSpecificConversationToAdmin(Model model, Principal principal, @PathVariable("conversationId") Long conversationId) {
         Long theId = conversationId;
-
+        var loggedInUser = getUserByPrincipal(principal);
         List<Message> listMessages = messageRepo.findMessagesByConversationId(theId);
-        var c = conversationRepo.findByConversationId(theId);
-        System.out.println(c.getConversationId());
-        var user = c.getUser();
-        System.out.println(user.getFirstName());
+        var conversation = conversationRepo.findByConversationId(theId);
+        var user = conversation.getUser();
 
-
+        model.addAttribute("loggedInUser", loggedInUser);
         model.addAttribute("user", user);
         model.addAttribute("listMessages", listMessages);
         model.addAttribute("formMessage", new FormMessage("", theId.toString()));
         return "conversation";
+    }
+
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PostMapping("/admin_conversation/{conversationId}")
+    public String submitMessageWhenItIsAdmin(Model model, Principal principal, @PathVariable("conversationId") Long conversationId, @ModelAttribute FormMessage preMessage) {
+
+        User admin = getUserByPrincipal(principal);
+        var conversation = conversationRepo.findByConversationId(conversationId);
+        var user = conversation.getUser();
+
+        var messageToSave = new Message();
+        messageToSave.setConversation(conversation);
+        messageToSave.setContent(preMessage.content);
+        messageToSave.setItFromAdmin(true);
+
+        messageRepo.save(messageToSave);
+        List<Message> listMessages = messageRepo.findMessagesByConversationId(conversationId);
+
+        model.addAttribute("loggedInUser", admin);
+        model.addAttribute("user", user);
+        model.addAttribute("listMessages", listMessages);
+        model.addAttribute("formMessage", new FormMessage("", conversationId.toString()));
+        return "conversation";
 
     }
 
-    @GetMapping({"/conversation/{conversationId}","/conversation"})
+    @GetMapping({"/conversation/{conversationId}", "/conversation"})
     public String showSpecificConversation(Model model, Principal principal, @PathVariable("conversationId") Optional<Long> conversationId) {
         Long theId;
         if (conversationId.isPresent()) {
@@ -154,6 +139,7 @@ public class AppController {
     private String renderConversationTemplate(Long theId, Principal principal, Model model, String formMessage) {
         List<Message> listMessages = messageRepo.findMessagesByConversationId(theId);
         User user = getUserByPrincipal(principal);
+        model.addAttribute("loggedInUser", user);
         model.addAttribute("user", user);
         model.addAttribute("listMessages", listMessages);
         model.addAttribute("formMessage", new FormMessage("", theId.toString()));
@@ -169,8 +155,9 @@ public class AppController {
     }
 
 
-    private void prepareModelForChat(Model model, User user) {
+    private void prepareModelForChat(Model model, User user, User loggedInUser) {
         model.addAttribute("user", user);
+        model.addAttribute("loggedInUser", loggedInUser);
         List<Conversation> conversationsByUserId = conversationRepo.findConversationsByUserId(user.getUserId());
         List<Long> convIds = conversationsByUserId.stream().map(conversation -> conversation.getConversationId()).toList();
         model.addAttribute("listConversations", convIds);
@@ -195,4 +182,3 @@ public class AppController {
     }
 
 }
-

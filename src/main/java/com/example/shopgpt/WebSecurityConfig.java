@@ -47,7 +47,7 @@ public class WebSecurityConfig   {
                 })
                 .formLogin(login -> login
                         .usernameParameter("email")
-                        .defaultSuccessUrl("/chat")
+                        .defaultSuccessUrl("/index")
                         .permitAll())
                 .rememberMe(rememberMe -> rememberMe.key("uniqueAndSecret"))
                 .logout(logout -> logout.logoutSuccessUrl("/").permitAll())

@@ -7,16 +7,13 @@
     <script type="text/javascript" src="/webjars/bootstrap/js/bootstrap.min.js"></script>
 </head>
 <body>
+<div>
+    <!-- Button to navigate to index page -->
+    <a th:href="@{/index}" class="btn btn-success">
+        <i class="fa fa-arrow-circle-o-left"></i>&nbsp;Back to home
+    </a>
+</div>
 <div class="container text-center">
-    <div>
-        <form th:action="@{/logout}" method="post">
-            <p>
-<!--                Welcome <b><span sec:authentication="principal.fullName"></span></b>-->
-                welcome <span sec:authorize="isAuthenticated()" sec:authentication="principal.authorities"/>
-            </p>
-            <input type="submit" value="Sign Out" />
-        </form>
-    </div>
     <div>
         <h1>List of Users</h1>
     </div>
@@ -42,6 +39,13 @@
             </tr>
             </tbody>
         </table>
+    </div>
+
+    <div>
+        <form th:action="@{/logout}" method="post">
+
+            <input type="submit" value="Sign Out" />
+        </form>
     </div>
 </div>
 </body>
