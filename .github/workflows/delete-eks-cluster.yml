@@ -1,0 +1,47 @@
+
+name: delete all infra
+
+on:
+  workflow_dispatch
+
+env:
+  AWS_REGION: "eu-west-1"
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    name: Undeploy
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+      - name: install eksctl and delete cluster
+        id: delete-cluster
+        run: |
+          ARCH=amd64
+          PLATFORM=$(uname -s)_$ARCH
+          
+          curl -sLO "https://github.com/eksctl-io/eksctl/releases/latest/download/eksctl_$PLATFORM.tar.gz"
+          
+          # (Optional) Verify checksum
+          curl -sL "https://github.com/eksctl-io/eksctl/releases/latest/download/eksctl_checksums.txt" | grep $PLATFORM | sha256sum --check
+          
+          tar -xzf eksctl_$PLATFORM.tar.gz -C /tmp && rm eksctl_$PLATFORM.tar.gz
+          
+          sudo mv /tmp/eksctl /usr/local/bin
+          
+          aws eks update-kubeconfig --name shopgpt
+          kubectl delete --all deployments --all-namespaces
+          kubectl delete --all Service --all-namespaces
+          eksctl delete cluster -f ${{ github.workspace }}/cluster-setup/eks.yaml
