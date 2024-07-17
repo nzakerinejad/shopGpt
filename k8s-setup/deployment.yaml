@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: shopgpt
+  labels:
+    app: shopgpt
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: shopgpt
+  template:
+    metadata:
+      labels:
+        app: shopgpt
+    spec:
+      containers:
+        - name: shopgpt
+          image: shopgpt
+          ports:
+            - containerPort: 8000
