@@ -45,6 +45,12 @@ jobs:
           fi
           aws eks update-kubeconfig --name shopgpt            
 
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
 
